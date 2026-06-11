@@ -7,6 +7,11 @@ import Pengguna from "./pages/pengguna";
 
 import PenggunaCreate from "./pages/penggunacreate";
 import Profil from "./pages/profil";
+// Perangkat
+import Perangkat from "./pages/perangkat";
+import PerangkatCreate from "./pages/perangkatcreate";
+import PerangkatUpdate from "./pages/perangkatupdate";
+
 import PenggunaUpdate from "./pages/penggunaupdate";
 
 const App = () => {
@@ -20,6 +25,11 @@ const App = () => {
           <Route path="pengguna/tambah" element={<PenggunaCreate />} />
           <Route path="pengguna/update/:id" element={<PenggunaUpdate />} />
           <Route path="profil" element={<Profil />} />
+
+          {/* Perangkat */}
+          <Route path="perangkat" element={<Perangkat />} />
+          <Route path="perangkat/tambah" element={<PerangkatCreate />} />
+          <Route path="perangkat/update/:id" element={<PerangkatUpdate />} />
         </Route>
       </Routes>
     </BrowserRouter>
