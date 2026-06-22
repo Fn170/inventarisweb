@@ -1,73 +1,70 @@
+import { Box, Button, Card, CardBody, CardHeader, CardTitle, Input, NativeSelect, Text } from "@chakra-ui/react";
+import { Toaster } from "../components/ui/toaster";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { TampilPesan } from "../components/ui/services";
 import { useEffect, useState } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
-import { useParams } from 'react-router-dom';
-import { Link  } from "react-router-dom";
 import axios from "axios";
 
-import {
-    Box,
-    Button,
-    Card,
-    CardBody,
-    CardHeader,
-    CardRoot,
-    CardTitle,
-    Center,
-    Image,
-    Input,
-    Text,
-  } from "@chakra-ui/react";
-
-const PenggunaUpdate = () => {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [nama, setNama] = useState("");
-    
+const PerangkatUpdate = () => {
     const navigate = useNavigate();
-    const { id } = useParams(); 
 
-    console.log(id);
-  
-    
-    const selectSatuPengguna = async () => {
-      const url = `http://localhost/inventarisweb/satupenggunaread.php?id=${id}`;
-      try {
-        const response = await axios.get(url);
-        console.log(response); 
-        
-        
-        setNama(response.data["DATA"][0]["nama"]);
-        setUsername(response.data["DATA"][0]["username"]);
-        setPassword(response.data["DATA"][0]["password"]);
-      } catch (error) {
-        console.log(error);
-        
-      }
-    };
-  
-    useEffect(() => {
-      selectSatuPengguna();
-    }, []);
-  
-    
-    const handleUpdate = async () => {
-      const url = "http://localhost/inventarisweb/penggunaupdate.php";
-      const body = { username: username, password: password, nama: nama, id: id };
-  
-      try {
-        const response = await axios.post(url, body);
-        // console.log(response);
-  
-        if (response.data.STATUS === "BERHASIL") {
-          navigate("/dashboard/pengguna");
-        } else {
-          navigate("/dashboard/pengguna/update");
+    const [namaPerangkat, setNamaPerangkat] = useState("");
+    const [jenisPerangkat, setJenisPerangkat] = useState("");
+    const [posisi, setPosisi] = useState("");
+
+    const { id } = useParams();
+    const selectSatuPerangkat = async () => {
+        const url = `http://localhost/inventarisweb/satuperangkatread.php?id=${id}`;
+
+        try {
+            const res = await axios.get(url);
+            const data = res.data["DATA"][0];
+            setNamaPerangkat(data["nama_perangkat"]);
+            setJenisPerangkat(data["jenis_perangkat"]);
+            setPosisi(data["posisi"]);
+        } catch (error) {
+            console.log(error);
+            TampilPesan("Info", "Gagal mengambil data!");
         }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-  
+    }
+
+    const handleUpdate = async () => {
+        const url = "http://localhost/inventarisweb/perangkatupdate.php";
+        const body = { nama_perangkat: namaPerangkat, jenis_perangkat: jenisPerangkat, posisi: posisi, id: id };
+
+        try {
+            const res = await axios.post(url, body);
+
+            if(res.data.STATUS === "BERHASIL") {
+                navigate("/dashboard/perangkat");
+                TampilPesan("Info", "Perangkat berhasil diupdate!");
+            } else {
+                navigate("/dashboard/perangkat/update");
+                TampilPesan("Info", "Gagal mengupdate perangkat!");
+            }
+        } catch (error) {
+            TampilPesan("Info", "Terjadi Kesalahan.");
+        }
+    }
+
+    const jenisOptions = [
+        {label: "MOUSE", value: "MOUSE"},
+        {label: "KEYBOARD", value: "KEYBOARD"},
+        {label: "CPU", value: "CPU"},
+        {label: "MONITOR", value: "MONITOR"}
+    ];
+
+    const posisiOptions = [
+        {label: "LAB A", value: "LAB A"},
+        {label: "LAB B", value: "LAB B"},
+        {label: "LAB C", value: "LAB C"},
+        {label: "LAB D", value: "LAB D"}
+    ];
+
+    useEffect(() => {
+        selectSatuPerangkat();
+    }, []);
+
     return (
         <>
             <Box
@@ -78,51 +75,47 @@ const PenggunaUpdate = () => {
                 justifyContent="center"
                 alignItems="center"
             >
-                <Card.Root width="50dvw" shadowColor="bg.emphasized" shadow="lg">
+                <Toaster />
+                <Card.Root
+                    width="50dvw"
+                    shadowColor="bg.emphasized"
+                    shadow="lg"
+                >
                     <CardHeader>
                         <CardTitle>
-                            <Text>Form Update Pengguna</Text>
+                            <Text>Form Ubah Perangkat</Text>
                         </CardTitle>
                     </CardHeader>
-            
-                    {/* <CardBody gap="4"> */}
                     <CardBody gapY="10px">
-                        <Input
-                            onChange={(e) => {setUsername(e.target.value);}}
-                            placeholder="Username"
-                            type="text"
-                            value={username}
-                        />
-                        <Input
-                            onChange={(e) => {setPassword(e.target.value);}}
-                            placeholder="Password"
-                            type="password"
-                            value={password}
-                        />
-                        <Input
-                            onChange={(e) => {setNama(e.target.value);}}
-                            placeholder="Nama"
-                            type="text"
-                            value={nama}
-                        />
-            
+                        <Input placeholder="Nama Perangkat" type="text" value={namaPerangkat} onChange={(e) => setNamaPerangkat(e.target.value)}></Input>
+                        <NativeSelect.Root>
+                            <NativeSelect.Field placeholder="Pilih Jenis Perangkat" value={jenisPerangkat} onChange={(e) => setJenisPerangkat(e.target.value)}>
+                                {jenisOptions.map((item, index) => (
+                                    <option key={index} value={item.value}>{item.label}</option>
+                                ))}
+                            </NativeSelect.Field>
+                        </NativeSelect.Root>
+                        <NativeSelect.Root>
+                            <NativeSelect.Field placeholder="Pilih Posisi" value={posisi} onChange={(e) => setPosisi(e.target.value)}>
+                                {posisiOptions.map((item, index) => (
+                                    <option key={index} value={item.value}>{item.label}</option>
+                                ))}
+                            </NativeSelect.Field>
+                        </NativeSelect.Root>
+
                         <Button
-                            onClick={() => { handleUpdate(); }}
-                            
-                            // colorPalette="teal"
                             backgroundColor="teal"
-                            // variant="solid"
                             color="white"
                             borderRadius="10px"
+                            onClick={() => handleUpdate()}
                         >
-                            <Text>Update Pengguna</Text>
+                            <Text>Update Perangkat</Text>
                         </Button>
-            
                         <Button
                             as={Link}
-                            to="/dashboard/pengguna"
-                            variant="outline"
+                            to="/dashboard/perangkat"
                             borderRadius="10px"
+                            variant="outline"
                         >
                             <Text>Kembali</Text>
                         </Button>
@@ -131,8 +124,6 @@ const PenggunaUpdate = () => {
             </Box>
         </>
     );
-  };
-  
-export default PenggunaUpdate;
-  
-  
+}
+
+export default PerangkatUpdate;

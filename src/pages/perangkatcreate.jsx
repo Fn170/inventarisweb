@@ -1,51 +1,67 @@
-import { For,
-    Portal,
-    Select,
-    Stack,
-    createListCollection,Box, Card, Text ,CardHeader,CardTitle,CardBody,Input, Button} from "@chakra-ui/react";
-import { Outlet, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-
-
-
-
-import { Link } from "react-router-dom";
+import { Box, Button, Card, CardBody, CardHeader, CardTitle, Input, NativeSelect, Text } from "@chakra-ui/react";
+import { Toaster } from "../components/ui/toaster";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { TampilPesan } from "../components/ui/services";
 import axios from "axios";
 
 const PerangkatCreate = () => {
-    const [jenis_perangkat, setJenisPerangkat] = useState("");
-    const [posisi, setPosisi] = useState("");
-    const [nama_perangkat, setNamaPerangkat] = useState("");
     const navigate = useNavigate();
 
-    const handleTambah = async () => {
-        console.log(value);
-        
-        // const url = "http://localhost/inventarisweb/perangkatinsert.php";
-        // const body = { jenis_perangkat: jenis_perangkat, posisi: posisi, nama_perangkat: nama_perangkat };
-    
-        // try {
-        //   const response = await axios.post(url, body);
-          
-    
-          
-        //   if (response.data.STATUS === "BERHASIL") {
-        //     navigate("/dashboard/perangkat");
-        //   } else {
-        //     navigate("/dashboard/perangkat/tambah");
-        //   }
-        // } catch (error) {
-        //   console.log(error);
-        // }
-    };
-    
+    const [namaPerangkat, setNamaPerangkat] = useState("");
+    const [jenisPerangkat, setJenisPerangkat] = useState("");
+    const [posisi, setPosisi] = useState("");
 
-    
-    const [value, setValue] = useState([])
+    const jenisOptions = [
+        {label: "MOUSE", value: "MOUSE"},
+        {label: "KEYBOARD", value: "KEYBOARD"},
+        {label: "CPU", value: "CPU"},
+        {label: "MONITOR", value: "MONITOR"}
+    ];
+
+    const posisiOptions = [
+        {label: "LAB A", value: "LAB A"},
+        {label: "LAB B", value: "LAB B"},
+        {label: "LAB C", value: "LAB C"},
+        {label: "LAB D", value: "LAB D"}
+    ];
+
+    const tambahPerangkat = async () => {
+        const url = "http://localhost/inventarisweb/perangkatinsert.php";
+        const body = {nama_perangkat: namaPerangkat, jenis_perangkat: jenisPerangkat, posisi: posisi};
+
+        if(namaPerangkat === "") {
+            TampilPesan("Info", "Nama perangkat tidak boleh kosong.");
+            return;
+        }
+
+        if(jenisPerangkat <= 0) {
+            TampilPesan("Info", "Jenis perangkat tidak boleh kosong.");
+            return;
+        }
+
+        if(posisi <= 0) {
+            TampilPesan("Info", "Posisi tidak boleh kosong.");
+            return;
+        }
+ 
+        try {
+            const res = await axios.post(url, body);
+
+            if(res.data.STATUS === "BERHASIL") {
+                navigate("/dashboard/perangkat");
+                TampilPesan("Info", "Perangkat berhasil ditambahkan!");
+            } else {
+                navigate("/dashboard/perangkat/tambah");
+                TampilPesan("Info", "Gagal menambahkan perangkat!");
+            }
+        } catch (error) {
+            TampilPesan("Info", "Terjadi Kesalahan");
+        }
+    }
+
     return (
-        
         <>
-     
             <Box
                 display="flex"
                 flexDirection="column"
@@ -54,68 +70,48 @@ const PerangkatCreate = () => {
                 justifyContent="center"
                 alignItems="center"
             >
-                <Card.Root width="50dvw" shadowColor="bg.emphasized" shadow="lg">
+                <Toaster />
+                <Card.Root
+                    width="50dvw"
+                    shadowColor="bg.emphasized"
+                    shadow="lg"
+                >
                     <CardHeader>
                         <CardTitle>
                             <Text>Form Tambah Perangkat</Text>
                         </CardTitle>
                     </CardHeader>
-                    
                     <CardBody gapY="10px">
+                        <Input placeholder="Nama Perangkat" type="text" onChange={(e) => setNamaPerangkat(e.target.value)}></Input>
+                        <NativeSelect.Root>
+                            <NativeSelect.Field placeholder="Pilih Jenis Perangkat" onChange={(e) => setJenisPerangkat(e.target.value)}>
+                                {jenisOptions.map((item, index) => (
+                                    <option key={index} value={item.value}>{item.label}</option>
+                                ))}
+                            </NativeSelect.Field>
+                        </NativeSelect.Root>
+                        <NativeSelect.Root>
+                            <NativeSelect.Field placeholder="Pilih Posisi" onChange={(e) => setPosisi(e.target.value)}>
+                                {posisiOptions.map((item, index) => (
+                                    <option key={index} value={item.value}>{item.label}</option>
+                                ))}
+                            </NativeSelect.Field>
+                        </NativeSelect.Root>
 
-                    
-                    <For each={["outline", "subtle"]}>
-                    {(variant) => (
-                    // <Select.Root key={variant} variant={variant} collection={frameworks}>
-
-                    <Select.Root
-                    key={variant}
-                    collection={frameworks}
-                    width="320px"
-                    value={frameworks.value}
-                    onValueChange={(e) => setValue(e.value)
-
-                        
-                    }
-                    >
-                    
-                        
-                        <Select.HiddenSelect />
-                        <Select.Label>Select framework - {variant}</Select.Label>
-                        <Select.Control>
-                        <Select.Trigger>
-                            <Select.ValueText placeholder="Select framework" />
-                        </Select.Trigger>
-                        <Select.IndicatorGroup>
-                            <Select.Indicator />
-                        </Select.IndicatorGroup>
-                        </Select.Control>
-                        <Portal>
-                        <Select.Positioner>
-                            <Select.Content>
-                            {frameworks.items.map((framework) => (
-                                <Select.Item item={framework} key={framework.value}>
-                                {framework.label}
-                                <Select.ItemIndicator />
-                                </Select.Item>
-                            ))}
-                            </Select.Content>
-                        </Select.Positioner>
-                        </Portal>
-                    </Select.Root>
-                    )}
-                    </For>
-                    {/* <Input onChange={(e) => {setJenisPerangkat(e.target.value)}} placeholder="JenisPerangkat" type="text" />
-                    <Input onChange={(e) => {setPosisi(e.target.value)}} placeholder="Posisi" type="text"/> */}
-                    <Input onChange={(e) => {setNamaPerangkat(e.target.value)}} placeholder="NamaPerangkat" type="text" />
-
-                        
-                        <Button onClick={() => { handleTambah() }}backgroundColor="teal"color="white" borderRadius="10px">
-
-                        
+                        <Button
+                            backgroundColor="teal"
+                            color="white"
+                            borderRadius="10px"
+                            onClick={() => tambahPerangkat()}
+                        >
                             <Text>Tambah Perangkat</Text>
                         </Button>
-                        <Button as={Link}to="/dashboard/perangkat"variant="outline"borderRadius="10px">
+                        <Button
+                            as={Link}
+                            to="/dashboard/perangkat"
+                            borderRadius="10px"
+                            variant="outline"
+                        >
                             <Text>Kembali</Text>
                         </Button>
                     </CardBody>
@@ -123,20 +119,6 @@ const PerangkatCreate = () => {
             </Box>
         </>
     );
-};
-
-
-
-const frameworks = createListCollection({
-    items: [
-      { label: "React.js", value: "react" },
-      { label: "Vue.js", value: "vue" },
-      { label: "Angular", value: "angular" },
-      { label: "Svelte", value: "svelte" },
-    ],
-  })
+}
 
 export default PerangkatCreate;
-
-
-
